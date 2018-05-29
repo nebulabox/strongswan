@@ -308,7 +308,8 @@ static bool load_cfg_candidates(private_ike_auth_t *this)
 		ike_cfg = peer_cfg->get_ike_cfg(peer_cfg);
 		if (!ike_cfg->has_proposal(ike_cfg, ike_proposal, private))
 		{
-			DBG2(DBG_CFG, "skip peer config '%s' without matching IKE proposal");
+			DBG2(DBG_CFG, "ignore peer config '%s' without matching IKE "
+				 "proposal", peer_cfg->get_name(peer_cfg));
 			continue;
 		}
 		peer_cfg->get_ref(peer_cfg);
