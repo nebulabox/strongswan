@@ -811,11 +811,26 @@ dhcp_socket_t *dhcp_socket_create()
 		 * actually use, we can also just send our requests from port 67 */
 		src.sin_port = htons(DHCP_SERVER_PORT);
 	}
+
+rebind:
 	if (bind(this->send, (struct sockaddr*)&src, sizeof(src)) == -1)
 	{
-		DBG1(DBG_CFG, "unable to bind DHCP send socket: %s", strerror(errno));
-		destroy(this);
-		return NULL;
+		if (src.sin_port == htons(DHCP_CLIENT_PORT) || errno != EADDRINUSE)
+		{
+			DBG1(DBG_CFG, "unable to bind DHCP send socket: %s",
+				 strerror(errno));
+			destroy(this);
+			return NULL;
+		}
+		/* if we tried to bind to the server port and that was already in use,
+		 * we retry to bind to the client port.  Since we only need to bind the
+		 * server port to avoid ICMP port unreachable messages it's fine if e.g.
+		 * a local DHCP server is already bound to it.  On Linux, SO_REUSEADDR
+		 * actually behaves like SO_REUSEPORT does on other systems, so this
+		 * is not required there, unless the other process binds port 67 to a
+		 * specific address */
+		src.sin_port = htons(DHCP_CLIENT_PORT);
+		goto rebind;
 	}
 
 	this->receive = socket(AF_PACKET, SOCK_DGRAM, htons(ETH_P_IP));
