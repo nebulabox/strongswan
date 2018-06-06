@@ -15,6 +15,18 @@ charon.plugins.dhcp.identity_lease = no
 charon.plugins.dhcp.server = 255.255.255.255
 	DHCP server unicast or broadcast IP address.
 
+charon.plugins.dhcp.force_client_port = no
+	Always use the DHCP client port (68) as source port.
+
+	Always use the DHCP client port (68) as source port, even if a server
+	address is configured and the plugin acts as relay agent.  When replying in
+	this mode the DHCP server will send replies to the DHCP server port (67) and
+	to avoid ICMP port unreachables the plugin binds that port when acting as
+	relay agent.  However, if a DHCP server is already running on the same host
+	this could cause conflicts so this option allows always using port 68 as
+	source port (and since the server port is already bound, ICMPs should not
+	be an issue either).
+
 charon.plugins.dhcp.interface
 	Interface name the plugin uses for address allocation.
 
